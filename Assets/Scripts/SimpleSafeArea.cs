@@ -17,7 +17,7 @@ public class SimpleSafeArea : MonoBehaviour
 
     private void Update()
     {
-        Rect safeArea = Screen.safeArea;
+        Rect safeArea = GetSafeArea();
         Vector2Int screenSize = new(Screen.width, Screen.height);
 
         if (safeArea == lastSafeArea &&
@@ -41,7 +41,7 @@ public class SimpleSafeArea : MonoBehaviour
             return;
         }
 
-        Rect safeArea = Screen.safeArea;
+        Rect safeArea = GetSafeArea();
 
         Vector2 anchorMin = new(
             safeArea.xMin / Screen.width,
@@ -59,5 +59,17 @@ public class SimpleSafeArea : MonoBehaviour
 
         lastSafeArea = safeArea;
         lastScreenSize = new Vector2Int(Screen.width, Screen.height);
+    }
+
+    private static Rect GetSafeArea()
+    {
+        Rect safeArea = Screen.safeArea;
+        if (!Application.isPlaying || safeArea.xMin < 0 || safeArea.yMin < 0 ||
+            safeArea.xMax > Screen.width || safeArea.yMax > Screen.height)
+        {
+            return new Rect(0, 0, Screen.width, Screen.height);
+        }
+
+        return safeArea;
     }
 }
