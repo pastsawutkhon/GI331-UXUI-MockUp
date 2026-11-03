@@ -5,7 +5,22 @@ using UnityEngine;
 
 public static class UGSManager
 {
-    public static async Task InitializeAsync()
+    private static readonly object initializationLock = new object();
+    private static Task initializationTask;
+
+    public static Task InitializeAsync()
+    {
+        lock (initializationLock)
+        {
+            if (initializationTask == null || initializationTask.IsFaulted || initializationTask.IsCanceled ||
+                (initializationTask.IsCompleted && !AuthenticationService.Instance.IsSignedIn))
+                initializationTask = InitializeServicesAsync();
+
+            return initializationTask;
+        }
+    }
+
+    private static async Task InitializeServicesAsync()
     {
         if (UnityServices.State != ServicesInitializationState.Initialized)
         {
